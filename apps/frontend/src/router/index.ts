@@ -8,6 +8,12 @@ const LoginView = () => import(
   '@/views/LoginView.vue'
 );
 
+const RegisterView = () => import(
+  /* webpackChunkName: "register" */
+  /* webpackPrefetch: true */
+  '@/views/RegisterView.vue'
+);
+
 const ItemsView = () => import(
   /* webpackChunkName: "items" */
   /* webpackPrefetch: true */
@@ -32,6 +38,15 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresGuest: true,
       title: 'ログイン'
+    }
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: RegisterView,
+    meta: {
+      requiresGuest: true,
+      title: '新規登録'
     }
   },
   {

@@ -78,15 +78,52 @@
         <CardContent>
           <ErrorMessage v-if="error" :message=" error " @close="error = ''" />
 
+          <!-- 登録成功メッセージ -->
+          <div v-if="successMessage" class="mb-4 p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+            <p class="text-sm font-medium text-green-700 dark:text-green-300">
+              {{ successMessage }}
+            </p>
+          </div>
+
           <form @submit.prevent=" handleSubmit " class="space-y-4">
             <div class="space-y-2">
               <Label for="email">メールアドレス</Label>
-              <Input id="email" v-model=" email " type="email" placeholder="メールアドレスを入力" required />
+              <Input 
+                id="email" 
+                v-model=" email " 
+                type="email" 
+                placeholder="メールアドレスを入力" 
+                required 
+                :class="{
+                  'border-red-500 focus:border-red-500 focus:ring-red-200': emailError && emailTouched,
+                  'border-green-500 focus:border-green-500 focus:ring-green-200': isEmailValid && emailTouched
+                }"
+                @blur="emailTouched = true"
+                @input="emailTouched = true"
+              />
+              <p v-if="emailError && emailTouched" class="text-sm text-red-600 dark:text-red-400 mt-1">
+                {{ emailError }}
+              </p>
             </div>
 
             <div class="space-y-2">
               <Label for="password">パスワード</Label>
-              <Input id="password" v-model=" password " type="password" placeholder="パスワードを入力" required />
+              <Input 
+                id="password" 
+                v-model=" password " 
+                type="password" 
+                placeholder="パスワードを入力（6文字以上）" 
+                required 
+                :class="{
+                  'border-red-500 focus:border-red-500 focus:ring-red-200': passwordError && passwordTouched,
+                  'border-green-500 focus:border-green-500 focus:ring-green-200': isPasswordValid && passwordTouched
+                }"
+                @blur="passwordTouched = true"
+                @input="passwordTouched = true"
+              />
+              <p v-if="passwordError && passwordTouched" class="text-sm text-red-600 dark:text-red-400 mt-1">
+                {{ passwordError }}
+              </p>
             </div>
 
             <Button type="submit" class="w-full" :disabled=" !isFormValid || loading ">
@@ -101,13 +138,23 @@
           </form>
         </CardContent>
       </Card>
+
+      <!-- 新規登録リンク -->
+      <div class="text-center">
+        <p class="text-sm text-muted-foreground">
+          アカウントをお持ちでないですか？
+          <Button variant="link" class="p-0 h-auto font-medium text-primary" @click="goToRegister">
+            新規登録
+          </Button>
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -117,6 +164,7 @@ import ErrorMessage from '@/components/common/ErrorMessage.vue';
 import { useAuthStore } from '@/stores';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 // フォームの状態
@@ -124,6 +172,11 @@ const email = ref('');
 const password = ref('');
 const error = ref('');
 const loading = ref(false);
+
+// バリデーション状態
+const emailTouched = ref(false);
+const passwordTouched = ref(false);
+const successMessage = ref('');
 
 // デモアカウント情報
 const demoEmail = 'admin@test.com';
@@ -143,9 +196,31 @@ const isEmailValid = computed(() =>
 const isPasswordValid = computed(() => password.value.length >= 6);
 const isFormValid = computed(() => isEmailValid.value && isPasswordValid.value);
 
+// バリデーションエラーメッセージ
+const emailError = computed(() => {
+  if (!emailTouched.value) return '';
+  if (email.value.length === 0) return 'メールアドレスを入力してください';
+  if (!isEmailValid.value) return '有効なメールアドレス形式で入力してください';
+  return '';
+});
+
+const passwordError = computed(() => {
+  if (!passwordTouched.value) return '';
+  if (password.value.length === 0) return 'パスワードを入力してください';
+  if (!isPasswordValid.value) return 'パスワードは6文字以上で入力してください';
+  return '';
+});
+
 // フォーム送信処理
 const handleSubmit = async () => {
-  if (!isFormValid.value) return;
+  // すべてのフィールドをtouchedにしてバリデーションエラーを表示
+  emailTouched.value = true;
+  passwordTouched.value = true;
+  
+  if (!isFormValid.value) {
+    error.value = '入力内容に誤りがあります。赤字のエラーメッセージをご確認ください。';
+    return;
+  }
 
   loading.value = true;
   error.value = '';
@@ -160,12 +235,25 @@ const handleSubmit = async () => {
       // ログイン成功時はアイテム管理画面にリダイレクト
       email.value = '';
       password.value = '';
+      emailTouched.value = false;
+      passwordTouched.value = false;
       router.push('/items');
     } else {
-      error.value = authStore.error || 'ログインに失敗しました。メールアドレスとパスワードを確認してください。';
+      const authError = authStore.error || 'ログインに失敗しました。';
+      if (authError.includes('email') || authError.includes('メール')) {
+        error.value = 'メールアドレスが見つかりません。';
+      } else if (authError.includes('password') || authError.includes('パスワード')) {
+        error.value = 'パスワードが正しくありません。';
+      } else {
+        error.value = 'ログインに失敗しました。メールアドレスとパスワードを確認してください。';
+      }
     }
-  } catch (err) {
-    error.value = 'ログインに失敗しました。メールアドレスとパスワードを確認してください。';
+  } catch (err: any) {
+    if (err.message && err.message.includes('401')) {
+      error.value = 'メールアドレスまたはパスワードが正しくありません。';
+    } else {
+      error.value = 'ログイン処理中にエラーが発生しました。しばらくしてから再試行してください。';
+    }
   } finally {
     loading.value = false;
   }
@@ -236,4 +324,18 @@ const fillBothFields = () => {
   email.value = demoEmail;
   password.value = demoPassword;
 };
+
+/**
+ * 新規登録画面に遷移
+ */
+const goToRegister = () => {
+  router.push('/register');
+};
+
+// 登録完了後の処理
+if (route.query.registered === 'true') {
+  successMessage.value = '新規登録が完了しました。ログインしてください。';
+  // URLからクエリパラメータを削除
+  router.replace('/login');
+}
 </script>

@@ -1,10 +1,12 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
 import { db } from '../db/connection.js';
-import { verifyPassword, generateJWT } from '../utils/auth.js';
+import { verifyPassword, generateJWT, hashPassword } from '../utils/auth.js';
 import { authMiddleware } from '../middleware/auth.js';
 import {
   LoginRequestSchema,
   LoginResponseSchema,
+  RegisterRequestSchema,
+  RegisterResponseSchema,
   LogoutResponseSchema,
   SessionResponseSchema,
   AuthErrorResponseSchema
@@ -13,6 +15,7 @@ import { ErrorResponseSchema } from '../schemas/common.js';
 
 export const storeAuthApi = (app: OpenAPIHono) => {
   storeLoginRoute(app);
+  storeRegisterRoute(app);
   storeLogoutRoute(app);
   storeSessionRoute(app);
 };
@@ -93,6 +96,92 @@ const storeLoginRoute = (app: OpenAPIHono) => {
       });
     } catch (error) {
       console.error('Login error:', error);
+      return c.json({
+        success: false,
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }, 500);
+    }
+  });
+};
+
+const storeRegisterRoute = (app: OpenAPIHono) => {
+  // POST /api/auth/register ルート定義
+  const registerRoute = createRoute({
+    method: 'post',
+    path: '/api/auth/register',
+    request: {
+      body: {
+        content: { 'application/json': { schema: RegisterRequestSchema } }
+      }
+    },
+    responses: {
+      201: {
+        content: { 'application/json': { schema: RegisterResponseSchema } },
+        description: '登録成功'
+      },
+      400: {
+        content: { 'application/json': { schema: AuthErrorResponseSchema } },
+        description: 'バリデーションエラー'
+      },
+      409: {
+        content: { 'application/json': { schema: AuthErrorResponseSchema } },
+        description: 'メールアドレスが既に使用されています'
+      },
+      500: {
+        content: { 'application/json': { schema: ErrorResponseSchema } },
+        description: 'サーバーエラー'
+      }
+    }
+  });
+
+  // POST /api/auth/register エンドポイント実装
+  app.openapi(registerRoute, async (c) => {
+    try {
+      const body = c.req.valid('json');
+      const { name, email, password } = body;
+
+      // Check if email already exists
+      const existingUser = await db
+        .selectFrom('users')
+        .select(['id'])
+        .where('email', '=', email)
+        .executeTakeFirst();
+
+      if (existingUser) {
+        return c.json({
+          success: false,
+          error: 'このメールアドレスは既に使用されています'
+        }, 409);
+      }
+
+      // Hash password
+      const passwordHash = await hashPassword(password);
+
+      // Insert new user
+      const newUser = await db
+        .insertInto('users')
+        .values({
+          name,
+          email,
+          password_hash: passwordHash,
+          active: true
+        })
+        .returning(['id', 'name', 'email'])
+        .executeTakeFirstOrThrow();
+
+      return c.json({
+        success: true,
+        data: {
+          user: {
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email
+          }
+        }
+      }, 201);
+    } catch (error) {
+      console.error('Registration error:', error);
       return c.json({
         success: false,
         message: 'Internal server error',

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { LoginCredentials, AuthState } from '@/types';
+import type { LoginCredentials, RegisterCredentials, AuthState } from '@/types';
 import * as authService from '@/services/auth.service';
 import { getStoredToken } from '@/services/api';
 
@@ -58,6 +58,38 @@ export const useAuthStore = defineStore('auth', () => {
       return false;
     } catch (err: any) {
       error.value = err.message || 'ログイン処理中にエラーが発生しました。';
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * 新規登録処理
+   * @param credentials 新規登録情報
+   * @returns Promise<boolean> 登録成功の可否
+   */
+  async function register(credentials: RegisterCredentials): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      // APIを使用した新規登録処理
+      const response = await authService.register({
+        name: credentials.name,
+        email: credentials.email,
+        password: credentials.password
+      });
+
+      if (response && response.user) {
+        // 登録成功 - ログイン状態にはしない
+        return true;
+      }
+
+      error.value = '登録に失敗しました';
+      return false;
+    } catch (err: any) {
+      error.value = err.message || '登録処理中にエラーが発生しました。';
       return false;
     } finally {
       loading.value = false;
@@ -151,7 +183,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
   }
 
-  return {
+    return {
     // State
     isLoggedIn,
     currentUser,
@@ -164,6 +196,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Actions
     login,
+    register,
     logout,
     restoreAuthState,
     handleAuthError,

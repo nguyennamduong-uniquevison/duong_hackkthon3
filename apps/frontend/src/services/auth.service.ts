@@ -3,7 +3,7 @@
  * Handles all authentication-related API calls
  */
 import { api, setStoredToken, removeStoredToken, ApiError } from './api';
-import type { LoginRequest, LoginResponse, SessionResponse, ApiResponse } from '@/types';
+import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, SessionResponse, ApiResponse } from '@/types';
 
 /**
  * Login user with email and password
@@ -27,6 +27,29 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
       throw error;
     }
     throw new ApiError('ログイン処理中にエラーが発生しました');
+  }
+}
+
+/**
+ * Register new user
+ */
+export async function register(userData: RegisterRequest): Promise<RegisterResponse> {
+  try {
+    const response = await api<ApiResponse<RegisterResponse>>('/auth/register', {
+      method: 'POST',
+      body: userData,
+    });
+
+    if (response.success && response.data) {
+      return response.data;
+    }
+
+    throw new ApiError(response.error || '登録に失敗しました');
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError('登録処理中にエラーが発生しました');
   }
 }
 

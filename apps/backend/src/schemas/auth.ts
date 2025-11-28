@@ -12,6 +12,22 @@ export const LoginRequestSchema = z.object({
   })
 }).openapi('LoginRequest');
 
+// 新規登録用のリクエストスキーマ
+export const RegisterRequestSchema = z.object({
+  name: z.string().min(1).openapi({
+    example: 'John Doe',
+    description: 'ユーザーの名前'
+  }),
+  email: z.string().email().openapi({
+    example: 'user@example.com',
+    description: 'ユーザーのメールアドレス'
+  }),
+  password: z.string().min(6).openapi({
+    example: 'password123',
+    description: 'ユーザーのパスワード（6文字以上）'
+  })
+}).openapi('RegisterRequest');
+
 // ログイン成功時のレスポンススキーマ
 export const LoginResponseSchema = z.object({
   success: z.boolean().openapi({ example: true }),
@@ -27,6 +43,18 @@ export const LoginResponseSchema = z.object({
     })
   })
 }).openapi('LoginResponse');
+
+// 新規登録成功時のレスポンススキーマ
+export const RegisterResponseSchema = z.object({
+  success: z.boolean().openapi({ example: true }),
+  data: z.object({
+    user: z.object({
+      id: z.number().openapi({ example: 1 }),
+      name: z.string().openapi({ example: 'John Doe' }),
+      email: z.string().email().openapi({ example: 'user@example.com' })
+    })
+  })
+}).openapi('RegisterResponse');
 
 // ログアウト成功時のレスポンススキーマ
 export const LogoutResponseSchema = z.object({

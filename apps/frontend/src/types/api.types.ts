@@ -16,6 +16,12 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
 export interface LoginResponse {
   user: {
     id: number;
@@ -23,6 +29,14 @@ export interface LoginResponse {
     email: string;
   };
   token: string;
+}
+
+export interface RegisterResponse {
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
 
 export interface SessionResponse {
