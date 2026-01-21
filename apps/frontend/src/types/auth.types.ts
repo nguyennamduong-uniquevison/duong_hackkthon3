@@ -1,0 +1,47 @@
+/**
+ * ログイン認証情報
+ */
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+/**
+ * 登録情報
+ */
+export interface RegisterCredentials {
+  name: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * 登録リクエスト
+ */
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * 認証エラー
+ */
+export interface AuthError {
+  message: string;
+  code?: string;
+}
+
+/**
+ * 認証状態
+ */
+export interface AuthState {
+  isLoggedIn: boolean;
+  currentUser?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  loading: boolean;
+  error: AuthError | null;
+}
