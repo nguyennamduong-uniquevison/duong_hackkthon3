@@ -160,12 +160,12 @@ const handleSubmit = async () => {
     });
 
     if (success) {
-      // 登録成功時はアイテム管理画面にリダイレクト
+      // 登録成功時はクイズセット管理画面にリダイレクト
       name.value = '';
       email.value = '';
       password.value = '';
       confirmPassword.value = '';
-      router.push('/items');
+      router.push('/quiz-sets');
     } else {
       error.value = authStore.error || '登録に失敗しました。もう一度お試しください。';
     }

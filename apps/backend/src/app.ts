@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import { storeUserApi, storeItemApi, storeHealthApi, storeAuthApi, storeImageApi } from './apis/index.js'
+import { storeUserApi, storeItemApi, storeHealthApi, storeAuthApi, storeImageApi, storeQuizSetApi } from './apis/index.js'
 
 const basePath = process.env.BASE_PATH || ''
 
@@ -25,6 +25,7 @@ storeUserApi(apiApp)
 storeItemApi(apiApp)
 storeAuthApi(apiApp)
 storeImageApi(apiApp)
+storeQuizSetApi(apiApp)
 
 
 // OpenAPI仕様書の生成

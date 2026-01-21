@@ -14,6 +14,12 @@ const RegisterView = () => import(
   '@/views/RegisterView.vue'
 );
 
+const QuizSetsView = () => import(
+  /* webpackChunkName: "quiz-sets" */
+  /* webpackPrefetch: true */
+  '@/views/QuizSetsView.vue'
+);
+
 const ItemsView = () => import(
   /* webpackChunkName: "items" */
   /* webpackPrefetch: true */
@@ -47,6 +53,15 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresGuest: true,
       title: '新規登録'
+    }
+  },
+  {
+    path: '/quiz-sets',
+    name: 'QuizSets',
+    component: QuizSetsView,
+    meta: {
+      requiresAuth: true,
+      title: 'クイズセット管理'
     }
   },
   {
@@ -106,7 +121,7 @@ router.beforeEach(async (to, _from, next) => {
 
   // ゲスト専用ルートのガード（ログイン済みユーザーがログインページにアクセスするのを防ぐ）
   if (to.meta.requiresGuest && isLoggedIn) {
-    next('/items');
+    next('/quiz-sets');
     return;
   }
 

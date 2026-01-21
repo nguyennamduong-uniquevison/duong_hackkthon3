@@ -170,10 +170,10 @@ const handleSubmit = async () => {
     });
 
     if (success) {
-      // ログイン成功時はアイテム管理画面にリダイレクト
+      // ログイン成功時はクイズセット管理画面にリダイレクト
       email.value = '';
       password.value = '';
-      router.push('/items');
+      router.push('/quiz-sets');
     } else {
       error.value = authStore.error || 'ログインに失敗しました。メールアドレスとパスワードを確認してください。';
     }

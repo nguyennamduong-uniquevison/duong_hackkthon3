@@ -38,6 +38,19 @@ export type {
   AuthState
 } from './auth.types';
 
+// クイズ関連の型
+export type {
+  QuizCategory,
+  QuizSet,
+  CreateQuizSetInput,
+  UpdateQuizSetInput,
+  QuizQuestion,
+  CreateQuizQuestionInput,
+  UpdateQuizQuestionInput,
+  QuizAttempt,
+  QuizRating
+} from './quiz.types';
+
 // API関連の型
 export type {
   ApiResponse,
