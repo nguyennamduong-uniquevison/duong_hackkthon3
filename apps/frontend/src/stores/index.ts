@@ -4,5 +4,6 @@
  */
 
 export { useAuthStore } from './auth.store';
-export { useItemsStore } from './items.store';
+export { useSurveyStore } from './surveys.store';
 export { useImagesStore } from './images.store';
+export { useItemsStore } from './items.store';

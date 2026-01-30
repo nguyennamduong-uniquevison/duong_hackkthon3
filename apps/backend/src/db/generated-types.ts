@@ -11,7 +11,31 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
+export type Json = JsonValue;
+
+export type JsonArray = JsonValue[];
+
+export type JsonObject = {
+  [x: string]: JsonValue | undefined;
+};
+
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
+
+export type QuizCategory = "entertainment" | "general" | "geography" | "history" | "other" | "science" | "sports" | "technology";
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+
+export interface Answers {
+  answer_choices: Json | null;
+  answer_scale: number | null;
+  answer_text: string | null;
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  question_id: number;
+  response_id: number;
+}
 
 export interface Images {
   created_at: Generated<Timestamp>;
@@ -31,6 +55,79 @@ export interface Items {
   updated_at: Generated<Timestamp>;
 }
 
+export interface Questions {
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  is_required: Generated<boolean>;
+  options: Json | null;
+  order_index: number;
+  question_text: string;
+  question_type: string;
+  scale_config: Json | null;
+  survey_id: number;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface QuizAttempts {
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  quiz_set_id: number;
+  score: number;
+  time_taken_seconds: number | null;
+  total_questions: number;
+  user_id: number;
+}
+
+export interface QuizQuestions {
+  correct_answer: string;
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  order_index: number;
+  question_text: string;
+  quiz_set_id: number;
+  updated_at: Generated<Timestamp>;
+  wrong_answer1: string;
+  wrong_answer2: string;
+  wrong_answer3: string;
+}
+
+export interface QuizRatings {
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  quiz_set_id: number;
+  rating: number;
+  updated_at: Generated<Timestamp>;
+  user_id: number;
+}
+
+export interface QuizSets {
+  category: QuizCategory | null;
+  created_at: Generated<Timestamp>;
+  creator_id: number;
+  description: string | null;
+  id: Generated<number>;
+  is_public: Generated<boolean>;
+  title: string;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface Responses {
+  id: Generated<number>;
+  submitted_at: Generated<Timestamp>;
+  survey_id: number;
+}
+
+export interface Surveys {
+  created_at: Generated<Timestamp>;
+  description: string | null;
+  id: Generated<number>;
+  is_public: Generated<boolean>;
+  public_url: string;
+  title: string;
+  updated_at: Generated<Timestamp>;
+  user_id: number;
+}
+
 export interface Users {
   active: Generated<boolean>;
   created_at: Generated<Timestamp>;
@@ -42,7 +139,15 @@ export interface Users {
 }
 
 export interface DB {
+  answers: Answers;
   images: Images;
   items: Items;
+  questions: Questions;
+  quiz_attempts: QuizAttempts;
+  quiz_questions: QuizQuestions;
+  quiz_ratings: QuizRatings;
+  quiz_sets: QuizSets;
+  responses: Responses;
+  surveys: Surveys;
   users: Users;
 }

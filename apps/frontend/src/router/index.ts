@@ -14,16 +14,25 @@ const RegisterView = () => import(
   '@/views/RegisterView.vue'
 );
 
-const ItemsView = () => import(
-  /* webpackChunkName: "items" */
+const SurveysView = () => import(
+  /* webpackChunkName: "surveys" */
   /* webpackPrefetch: true */
-  '@/views/ItemsView.vue'
+  '@/views/SurveysView.vue'
 );
 
-const ImagesView = () => import(
-  /* webpackChunkName: "images" */
-  /* webpackPrefetch: true */
-  '@/views/ImagesView.vue'
+const SurveyEditView = () => import(
+  /* webpackChunkName: "survey-edit" */
+  '@/views/SurveyEditView.vue'
+);
+
+const SurveyResultsView = () => import(
+  /* webpackChunkName: "survey-results" */
+  '@/views/SurveyResultsView.vue'
+);
+
+const AnswerSurveyView = () => import(
+  /* webpackChunkName: "answer-survey" */
+  '@/views/AnswerSurveyView.vue'
 );
 
 const routes: RouteRecordRaw[] = [
@@ -50,21 +59,38 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/items',
-    name: 'Items',
-    component: ItemsView,
+    path: '/surveys',
+    name: 'Surveys',
+    component: SurveysView,
     meta: {
       requiresAuth: true,
-      title: 'アイテム管理'
+      title: 'アンケート一覧'
     }
   },
   {
-    path: '/images',
-    name: 'Images',
-    component: ImagesView,
+    path: '/surveys/:id',
+    name: 'SurveyEdit',
+    component: SurveyEditView,
     meta: {
       requiresAuth: true,
-      title: '画像管理'
+      title: 'アンケート編集'
+    }
+  },
+  {
+    path: '/surveys/:id/results',
+    name: 'SurveyResults',
+    component: SurveyResultsView,
+    meta: {
+      requiresAuth: true,
+      title: '回答結果'
+    }
+  },
+  {
+    path: '/answer/:publicUrl',
+    name: 'AnswerSurvey',
+    component: AnswerSurveyView,
+    meta: {
+      title: 'アンケート回答'
     }
   },
   {
@@ -106,15 +132,15 @@ router.beforeEach(async (to, _from, next) => {
 
   // ゲスト専用ルートのガード（ログイン済みユーザーがログインページにアクセスするのを防ぐ）
   if (to.meta.requiresGuest && isLoggedIn) {
-    next('/items');
+    next('/surveys');
     return;
   }
 
   // ページタイトルの設定
   if (to.meta.title) {
-    document.title = `${ to.meta.title } - サンプルシステム`;
+    document.title = `${ to.meta.title } - かんたんアンケート`;
   } else {
-    document.title = 'サンプルシステム';
+    document.title = 'かんたんアンケート';
   }
 
   next();
